@@ -23,10 +23,28 @@ $ npm i --save express mongoose bcryptjs jsonwebtoken dotenv
 ## API Structure
 
 ```bash
-$ mkdir routes models controllers utils
+$ mkdir routes models controllers utils middlewares
 ```
 
-## MongoDB Create special user
+### Cross-Origin Resource Sharing (CORS) Error handling Adding
+
+```bash
+touch middlewares/cors.js
+```
+
+```js
+module.exports = (req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+};
+```
+
+### MongoDB Create special user
 
 ```bash
 > use nodejs-db
