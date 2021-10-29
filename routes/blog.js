@@ -1,6 +1,7 @@
 const express = require("express");
 
 const blogController = require("../controllers/blog");
+const isAuth = require('../middlewares/is-auth');
 
 const router = express.Router();
 
@@ -8,18 +9,18 @@ const router = express.Router();
 router.get("/recently/", blogController.getRecently);
 
 // Get My Blogs
-router.get("/list/", blogController.getList);
+router.get("/list/", isAuth, blogController.getList);
 
 // Post Blog
-router.post("/", blogController.postBlog);
+router.post("/", isAuth, blogController.postBlog);
 
 // Get Blog
 router.get("/:blogId/", blogController.getBlog);
 
 // Edit My Blog
-router.patch("/:blogId", blogController.patchBlog);
+router.patch("/:blogId", isAuth, blogController.patchBlog);
 
 // Delete Blog
-router.delete("/:blogId/", blogController.deleteBlog);
+router.delete("/:blogId/", isAuth, blogController.deleteBlog);
 
 module.exports = router;

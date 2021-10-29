@@ -18,8 +18,9 @@ exports.postRegister = async (req, res, next) => {
 
     const token = jwt.sign(
       {
-        email: masterUser.email,
         userId: masterUser._id.toString(),
+        email: masterUser.email,
+        name: masterUser.name,
       },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
@@ -60,8 +61,9 @@ exports.postLogin = async (req, res, next) => {
 
     const token = jwt.sign(
       {
-        email: masterUser.email,
         userId: masterUser._id.toString(),
+        email: masterUser.email,
+        name: masterUser.name,
       },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
@@ -89,7 +91,7 @@ exports.patchUpdate = async (req, res, next) => {
   try {
     if (!newMail && !newName) {
       const error = new Error("There is nothing to change!");
-      error.statusCode = 401;
+      error.statusCode = 404;
       throw error;
     }
 
