@@ -1,5 +1,5 @@
-const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const User = require("../models/mongoose/user");
 
@@ -7,21 +7,28 @@ exports.postRegister = async (req, res, next) => {
   const { email, name, password: pswd } = req.body;
 
   try {
-    const key = crypto.randomBytes(32).toString("hex");
     const password = await bcrypt.hash(pswd, 12);
 
     const masterUser = new User({
       email,
       name,
       password,
-      key,
     });
     await masterUser.save();
 
+    const token = jwt.sign(
+      {
+        email: masterUser.email,
+        userId: masterUser._id.toString(),
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
     const sendPack = {
-      key: masterUser.key,
       email: masterUser.email,
       name: masterUser.name,
+      token,
     };
 
     res.status(201).json({ message: "User Created!", master: sendPack });
@@ -51,10 +58,19 @@ exports.postLogin = async (req, res, next) => {
       throw error;
     }
 
+    const token = jwt.sign(
+      {
+        email: masterUser.email,
+        userId: masterUser._id.toString(),
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
     const sendPack = {
-      key: masterUser.key,
       email: masterUser.email,
       name: masterUser.name,
+      token,
     };
 
     res.status(201).json({ message: "Login User", master: sendPack });
@@ -66,40 +82,9 @@ exports.postLogin = async (req, res, next) => {
   }
 };
 
-exports.patchRefreshKey = async (req, res, next) => {
-  const key = req.get("master-key");
-  const { email } = req.body;
-
-  try {
-    const masterUser = await User.findOne({ key, email });
-    if (!masterUser) {
-      const error = new Error("Invalid Authentication!");
-      error.statusCode = 401;
-      throw error;
-    }
-
-    const newKey = crypto.randomBytes(32).toString("hex");
-    masterUser.key = newKey;
-    await masterUser.save();
-
-    const sendPack = {
-      key: masterUser.key,
-      email: masterUser.email,
-      name: masterUser.name,
-    };
-
-    res.status(200).json({ message: "Key Refreshed", master: sendPack });
-  } catch (err) {
-    if (!err.statusCode) {
-      err.statusCode = 500;
-    }
-    next(err);
-  }
-};
-
 exports.patchUpdate = async (req, res, next) => {
-  const key = req.get("master-key");
-  const { email, newMail, newName } = req.body;
+  const { newMail, newName } = req.body;
+  const userId = req.userId;
 
   try {
     if (!newMail && !newName) {
@@ -108,7 +93,7 @@ exports.patchUpdate = async (req, res, next) => {
       throw error;
     }
 
-    const masterUser = await User.findOne({ key, email });
+    const masterUser = await User.findOne({ _id: userId });
     if (!masterUser) {
       const error = new Error("Invalid Authentication!");
       error.statusCode = 401;
@@ -124,7 +109,6 @@ exports.patchUpdate = async (req, res, next) => {
     await masterUser.save();
 
     const sendPack = {
-      key: masterUser.key,
       email: masterUser.email,
       name: masterUser.name,
     };
@@ -139,11 +123,11 @@ exports.patchUpdate = async (req, res, next) => {
 };
 
 exports.putPassword = async (req, res, next) => {
-  const key = req.get("master-key");
-  const { email, newPassword: pswd } = req.body;
+  const { newPassword: pswd } = req.body;
+  const userId = req.userId;
 
   try {
-    const masterUser = await User.findOne({ key, email });
+    const masterUser = await User.findOne({ _id: userId });
     if (!masterUser) {
       const error = new Error("Invalid Authentication!");
       error.statusCode = 401;
@@ -155,7 +139,6 @@ exports.putPassword = async (req, res, next) => {
     await masterUser.save();
 
     const sendPack = {
-      key: masterUser.key,
       email: masterUser.email,
       name: masterUser.name,
     };
@@ -172,11 +155,11 @@ exports.putPassword = async (req, res, next) => {
 };
 
 exports.deleteUser = async (req, res, next) => {
-  const key = req.get("master-key");
-  const { email } = req.body;
+  const userId = req.userId;
+  const email = req.userEmail;
 
   try {
-    const masterUser = await User.findOne({ key, email });
+    const masterUser = await User.findOne({ _id: userId });
     if (!masterUser) {
       const error = new Error("Invalid Authentication!");
       error.statusCode = 401;

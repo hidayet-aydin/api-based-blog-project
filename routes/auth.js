@@ -1,6 +1,7 @@
 const express = require("express");
 
-const authController = require('../controllers/auth');
+const authController = require("../controllers/auth");
+const isAuth = require("../middlewares/is-auth");
 
 const router = express.Router();
 
@@ -10,16 +11,13 @@ router.post("/register/", authController.postRegister);
 // Login User
 router.post("/login/", authController.postLogin);
 
-// Refresh Key
-router.patch("/refreshKey/", authController.patchRefreshKey);
-
 // Update User (email and name)
-router.patch("/update/", authController.patchUpdate);
+router.patch("/update/", isAuth, authController.patchUpdate);
 
 // New User Password
-router.put("/password/", authController.putPassword);
+router.put("/password/", isAuth, authController.putPassword);
 
 // Delete User
-router.delete("/user/", authController.deleteUser);
+router.delete("/user/", isAuth, authController.deleteUser);
 
 module.exports = router;
