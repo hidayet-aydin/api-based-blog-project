@@ -63,3 +63,24 @@ As a result, MongoDB connection string below is as follows. And, this connection
 ```
 MONGODB_URI='mongodb://test-user:newpassword@localhost:27017/api-based-blog'
 ```
+
+### Adding Endpoint and Internal Server Error Handling
+
+```bash
+$ touch controllers/error.js
+```
+
+```js
+exports.err404 = (req, res, next) => {
+  res.status(404).json({
+    message: "Endpoint not found",
+  });
+};
+
+exports.err500 = (error, req, res, next) => {
+  res.status(error.statusCode || 500).json({
+    message: error.message,
+    data: error.data,
+  });
+};
+```
