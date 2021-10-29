@@ -1,0 +1,41 @@
+{
+  "name": "api-based-blog-project",
+  "version": "1.0.0",
+  "description": "This project is backend REST API of a multi-user supported blog site.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "./node_modules/mocha/bin/mocha \"./{,!(node_modules)/**/}*.test.js\" --exit",
+    "coverage": "nyc --reporter=text npm test"
+  },
+  "author": {
+    "name": "hidayet-aydin",
+    "email": "aydin.hid@gmail.com"
+  },
+  "keywords": [
+    "rest",
+    "api",
+    "multi-user",
+    "blog"
+  ],
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "chai-as-promised": "^7.1.1",
+    "mocha": "^9.1.3",
+    "nodemon": "^2.0.14",
+    "nyc": "^15.1.0",
+    "rewire": "^5.0.0",
+    "sinon": "^11.1.2",
+    "sinon-chai": "^3.7.0",
+    "supertest": "^6.1.6"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.0.12"
+  }
+}
