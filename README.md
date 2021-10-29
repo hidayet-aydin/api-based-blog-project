@@ -2,22 +2,26 @@
 
 This application works as a REST API that Users can manage to list, add, delete, edit their own blogs. 
 
-Initial files
+**Initial Files**
 
 ```bash
 $ touch .env .gitignore index.js app.js
 ```
 
-Development Modules
+**Development Modules**
 
 ```bash
 $ npm i --save-dev nodemon nyc supertest mocha chai sinon sinon-chai chai-as-promised rewire
 ```
 
-Production Modules
+**Production Modules**
 
 ```bash
 $ npm i --save express mongoose bcryptjs jsonwebtoken dotenv
 ```
 
+## API Structure
 
+```bash
+$ mkdir routes models controllers
+```
