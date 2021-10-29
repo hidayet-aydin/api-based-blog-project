@@ -17,7 +17,7 @@ $ npm i --save-dev nodemon nyc supertest mocha chai sinon sinon-chai chai-as-pro
 **Production Modules**
 
 ```bash
-$ npm i --save express mongoose bcryptjs jsonwebtoken dotenv
+$ npm i --save express mongoose bcryptjs jsonwebtoken dotenv express-validator
 ```
 
 ## API Structure

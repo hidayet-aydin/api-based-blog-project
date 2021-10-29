@@ -104,3 +104,58 @@ exports.authPassword = validate([
       return true;
     }),
 ]);
+
+exports.blogPost = validate([
+  body("title")
+    .trim()
+    .not()
+    .isEmpty()
+    .withMessage("Title should not be empty.")
+    .isLength({ min: 3, max: 50 })
+    .withMessage("Please enter a valid title (min 5 and max 50 length)."),
+  body("shortContent")
+    .trim()
+    .not()
+    .isEmpty()
+    .withMessage("Short-Content should not be empty.")
+    .isLength({ min: 50, max: 300 })
+    .withMessage(
+      "Please enter a valid Short-Content (min 50 and max 300 length)."
+    ),
+  body("content")
+    .trim()
+    .not()
+    .isEmpty()
+    .withMessage("Content should not be empty.")
+    .isLength({ min: 300, max: 1000 })
+    .withMessage("Please enter a valid Content (min 200 and max 1000 length)."),
+]);
+
+exports.blogPatch = validate([
+  body("title")
+    .optional()
+    .trim()
+    .not()
+    .isEmpty()
+    .withMessage("Title should not be empty.")
+    .isLength({ min: 3, max: 50 })
+    .withMessage("Please enter a valid title (min 5 and max 50 length)."),
+  body("shortContent")
+    .optional()
+    .trim()
+    .not()
+    .isEmpty()
+    .withMessage("Short-Content should not be empty.")
+    .isLength({ min: 50, max: 300 })
+    .withMessage(
+      "Please enter a valid Short-Content (min 50 and max 300 length)."
+    ),
+  body("content")
+    .optional()
+    .trim()
+    .not()
+    .isEmpty()
+    .withMessage("Content should not be empty.")
+    .isLength({ min: 300, max: 1000 })
+    .withMessage("Please enter a valid Content (min 200 and max 1000 length)."),
+]);

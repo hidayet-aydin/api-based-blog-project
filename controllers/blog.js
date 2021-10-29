@@ -123,7 +123,6 @@ exports.patchBlog = async (req, res, next) => {
   const { blogId } = req.params;
   const userId = req.userId;
   const { title, shortContent, content } = req.body;
-  console.log(req.body);
 
   try {
     if (!title && !shortContent && !content) {
