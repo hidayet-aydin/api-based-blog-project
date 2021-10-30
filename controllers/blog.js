@@ -90,18 +90,28 @@ exports.getBlog = async (req, res, next) => {
   const { blogId } = req.params;
 
   try {
-    const selectedBlog = await Blog.findOne({ _id: blogId }).populate("userId");
+    const selectedBlog = await Blog.readBlog(blogId);
+
     if (!selectedBlog) {
       const error = new Error("Blog could not find!");
       error.statusCode = 404;
       throw error;
     }
 
+    if (!selectedBlog.readed) {
+      selectedBlog.readed = 1;
+    } else {
+      selectedBlog.readed = selectedBlog.readed + 1;
+    }
+
+    await selectedBlog.save();
+
     const sendPack = {
       blogId: selectedBlog._id.toString(),
       title: selectedBlog.title,
       shortContent: selectedBlog.shortContent,
       content: selectedBlog.content,
+      readed: selectedBlog.readed ? selectedBlog.readed : 0,
       created: selectedBlog.createdAt,
       updated: selectedBlog.updatedAt,
       author: {
