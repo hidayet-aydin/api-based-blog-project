@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const s3 = require("aws-s3");
 
 const User = require("../models/mongoose/user");
 
@@ -181,6 +182,8 @@ exports.deleteUser = async (req, res, next) => {
 
 exports.postUpload = async (req, res, next) => {
   const image = req.file;
+  const { bucketName, dirName, region, accessKeyId, secretAccessKey, s3Url } =
+    req.body;
 
   try {
     if (!image) {
@@ -189,7 +192,29 @@ exports.postUpload = async (req, res, next) => {
       throw error;
     }
 
-    const data_pack = image.path;
+    let data_pack = image.path;
+    if (bucketName && region && accessKeyId && secretAccessKey) {
+      const config = {
+        bucketName, // "myBucket"
+        dirName, // "photos" (optional)
+        region, // "eu-west-1"
+        accessKeyId, // "ANEIFNENI4324N2NIEXAMPLE"
+        secretAccessKey, // "cms21uMxçduyUxYjeg20+DEkgDxe6veFosBT7eUgEXAMPLE"
+        s3Url, // "https://my-s3-url.com/" (optional)
+      };
+      const S3Client = new s3(config);
+      const S3ResData = await S3Client.uploadFile(data_pack);
+      console.log(S3ResData);
+      // {
+      //   Response: {
+      //     bucket: "your-bucket-name",
+      //     key: "photos/image.jpg",
+      //     location: "https://your-bucket.s3.amazonaws.com/photos/image.jpg"
+      //   }
+      // }
+      data_pack = S3ResData.location;
+    }
+
     res.status(200).json({ message: "Image Uploaded", imageUrl: data_pack });
   } catch (err) {
     if (!err.statusCode) {

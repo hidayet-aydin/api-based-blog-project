@@ -17,13 +17,13 @@ $ npm i --save-dev nodemon nyc supertest mocha chai sinon sinon-chai chai-as-pro
 **Production Modules**
 
 ```bash
-$ npm i --save express mongoose bcryptjs jsonwebtoken dotenv express-validator
+$ npm i --save express mongoose bcryptjs jsonwebtoken dotenv express-validator multer aws-s3
 ```
 
 **API Folder Structure**
 
 ```bash
-$ mkdir routes models controllers utils middlewares
+$ mkdir routes models controllers utils middlewares storage
 ```
 
 ## 1. Cross-Origin Resource Sharing (CORS) Error handling Adding
@@ -85,7 +85,75 @@ exports.err500 = (error, req, res, next) => {
 };
 ```
 
-## 4. About Endpoints
+## 4. Image Upload Middleware (with Multer)
+
+```
+$ mkdir middlewares/image-storage.js
+```
+
+```js
+const multer = require("multer");
+
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "storage");
+  },
+  filename: (req, file, cb) => {
+    cb(
+      null,
+      (new Date().toISOString() + "-" + file.originalname).replace(/:/g, "")
+    );
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  if (
+    file.mimetype === "image/png" ||
+    file.mimetype === "image/jpg" ||
+    file.mimetype === "image/jpeg"
+  ) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
+
+module.exports = multer({
+  storage: fileStorage,
+  fileFilter: fileFilter,
+}).single("image");
+```
+
+## 5. Authentication Check Middleware (with JSON WEB TOKEN)
+
+```
+$ mkdir middlewares/is-auth.js
+```
+
+```js
+const { verify } = require("jsonwebtoken");
+
+module.exports = (req, res, next) => {
+  const token = req.get("Authorization").split(" ")[1];
+  let decodedToken;
+  try {
+    decodedToken = verify(token, process.env.JWT_SECRET);
+  } catch (err) {
+    err.statusCode = 500;
+    throw err;
+  }
+  if (!decodedToken) {
+    const error = new Error("Not authenticated.");
+    error.statusCode = 401;
+    throw error;
+  }
+  req.userId = decodedToken.userId;
+  req.userEmail = decodedToken.email;
+  next();
+};
+```
+
+## 6. About Endpoints
 
 There is two different endpoint groups that are consist of auth and blog. Because Blogs are used by users, user account management must be added. Thanks to authentication, a user only can make adding, modify and deletion process to own posts.
 
@@ -123,6 +191,7 @@ const express = require("express");
 const authCont = require("../controllers/auth");
 const isAuth = require("../middlewares/is-auth");
 const isValid = require("../middlewares/is-valid");
+const imageStorage = require("../middlewares/image-storage");
 
 const router = express.Router();
 
@@ -140,6 +209,9 @@ router.put("/password/", isAuth, isValid.authPassword, authCont.putPassword);
 
 // Delete User
 router.delete("/user/", isAuth, authCont.deleteUser);
+
+// Image Uplod
+router.post("/imgUpload/", isAuth, imageStorage, authCont.postUpload);
 
 module.exports = router;
 ```
@@ -176,7 +248,7 @@ router.delete("/:blogId/", isAuth, blogController.deleteBlog);
 module.exports = router;
 ```
 
-## 5. ".env" File
+## 7. ".env" File
 
 ```
 PORT=3000
