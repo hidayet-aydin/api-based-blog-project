@@ -3,6 +3,7 @@ const express = require("express");
 const authCont = require("../controllers/auth");
 const isAuth = require("../middlewares/is-auth");
 const isValid = require("../middlewares/is-valid");
+const imageStorage = require("../middlewares/image-storage");
 
 const router = express.Router();
 
@@ -20,5 +21,8 @@ router.put("/password/", isAuth, isValid.authPassword, authCont.putPassword);
 
 // Delete User
 router.delete("/user/", isAuth, authCont.deleteUser);
+
+// Image Uplod
+router.post("/imgUpload/", isAuth, imageStorage, authCont.postUpload);
 
 module.exports = router;

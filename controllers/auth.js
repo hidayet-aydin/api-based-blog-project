@@ -178,3 +178,23 @@ exports.deleteUser = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.postUpload = async (req, res, next) => {
+  const image = req.file;
+
+  try {
+    if (!image) {
+      const error = new Error("Attached file is not image.!");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const data_pack = image.path;
+    res.status(200).json({ message: "Image Uploaded", imageUrl: data_pack });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
