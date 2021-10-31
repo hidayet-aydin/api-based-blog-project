@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const app = require("./app");
-const db = require("./utils/mongoose");
+const app = require("./server/server");
+const db = require("./server/utils/mongoose");
 
 db.initDatabase(app);

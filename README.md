@@ -2,12 +2,6 @@
 
 This application works as a REST API that Users can manage to list, add, delete, edit their own blogs.
 
-**Initial Files**
-
-```bash
-$ touch .env .gitignore index.js app.js
-```
-
 **Development Modules**
 
 ```bash
@@ -20,31 +14,20 @@ $ npm i --save-dev nodemon nyc supertest mocha chai sinon sinon-chai chai-as-pro
 $ npm i --save express mongoose bcryptjs jsonwebtoken dotenv express-validator multer aws-s3
 ```
 
+**Initial Files**
+
+```bash
+$ touch .env .gitignore index.js README.md
+```
+
 **API Folder Structure**
 
 ```bash
-$ mkdir routes models controllers utils middlewares storage
+$ mkdir server storage
+$ mkdir server/routes server/models server/controllers server/utils server/middlewares
 ```
 
-## 1. Cross-Origin Resource Sharing (CORS) Error handling Adding
-
-```bash
-touch middlewares/cors.js
-```
-
-```js
-module.exports = (req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, PATCH, DELETE"
-  );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  next();
-};
-```
-
-## 2. MongoDB Create Special User and Collection
+## 1. MongoDB Create Special User and Collection
 
 ```bash
 > use nodejs-db
@@ -64,31 +47,28 @@ For a example, MongoDB connection string below is as follows. And, this connecti
 MONGODB_URI='mongodb://test-user:newpassword@localhost:27017/api-based-blog'
 ```
 
-## 3. Adding Endpoint and Internal Server Error Handling
+## 2. Cross-Origin Resource Sharing (CORS) Error handling Adding
 
 ```bash
-$ touch controllers/error.js
+$ touch server/middlewares/cors.js
 ```
 
 ```js
-exports.err404 = (req, res, next) => {
-  res.status(404).json({
-    message: "Endpoint not found",
-  });
-};
-
-exports.err500 = (error, req, res, next) => {
-  res.status(error.statusCode || 500).json({
-    message: error.message,
-    data: error.data,
-  });
+module.exports = (req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
 };
 ```
 
-## 4. Image Upload Middleware (with Multer)
+## 3. Image Upload Middleware (with Multer)
 
 ```
-$ mkdir middlewares/image-storage.js
+$ touch server/middlewares/image-storage.js
 ```
 
 ```js
@@ -124,10 +104,10 @@ module.exports = multer({
 }).single("image");
 ```
 
-## 5. Authentication Check Middleware (with JSON WEB TOKEN)
+## 4. Authentication Check Middleware (with JSON WEB TOKEN)
 
 ```
-$ mkdir middlewares/is-auth.js
+$ touch server/middlewares/is-auth.js
 ```
 
 ```js
@@ -153,11 +133,11 @@ module.exports = (req, res, next) => {
 };
 ```
 
-## 6. About Endpoints
+## 5. About Endpoints
 
 There is two different endpoint groups that are consist of auth and blog. Because Blogs are used by users, user account management must be added. Thanks to authentication, a user only can make adding, modify and deletion process to own posts.
 
-Given below are the contents of the **app.js** files.
+Given below are the contents of the **server/server.js** files.
 
 ```js
 const express = require("express");
@@ -171,7 +151,7 @@ const app = express();
 
 app.use(express.json());
 
-// Cross-Origin Resource Sharing (CORS) Error handling
+// Cross-Origin Resource Sharing (CORS)
 app.use(cors);
 
 app.use("/auth", authRoutes);
@@ -183,7 +163,7 @@ app.use(errorControllers.err404, errorControllers.err500);
 module.exports = app;
 ```
 
-Given below are the contents of the **routes/auth.js** files.
+Given below are the contents of the **server/routes/auth.js** files.
 
 ```js
 const express = require("express");
@@ -216,7 +196,7 @@ router.post("/imgUpload/", isAuth, imageStorage, authCont.postUpload);
 module.exports = router;
 ```
 
-Given below are the contents of the **routes/blog.js** files.
+Given below are the contents of the **server/routes/blog.js** files.
 
 ```js
 const express = require("express");
@@ -246,6 +226,27 @@ router.patch("/:blogId", isAuth, isValid.blogPatch, blogController.patchBlog);
 router.delete("/:blogId/", isAuth, blogController.deleteBlog);
 
 module.exports = router;
+```
+
+## 6. Adding Endpoint and Internal Server Error Handling
+
+```bash
+$ touch server/controllers/error.js
+```
+
+```js
+exports.err404 = (req, res, next) => {
+  res.status(404).json({
+    message: "Endpoint not found",
+  });
+};
+
+exports.err500 = (error, req, res, next) => {
+  res.status(error.statusCode || 500).json({
+    message: error.message,
+    data: error.data,
+  });
+};
 ```
 
 ## 7. ".env" File

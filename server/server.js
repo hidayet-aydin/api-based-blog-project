@@ -9,7 +9,7 @@ const app = express();
 
 app.use(express.json());
 
-// Cross-Origin Resource Sharing (CORS) Error handling
+// Cross-Origin Resource Sharing (CORS)
 app.use(cors);
 
 app.use("/auth", authRoutes);
