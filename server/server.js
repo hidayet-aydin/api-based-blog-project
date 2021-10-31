@@ -1,21 +1,25 @@
 const express = require("express");
 
 const cors = require("./middlewares/cors");
-const errorControllers = require("./controllers/error");
+const { successLogger, errorLogger } = require("./middlewares/http-logger");
+const { err404, err500 } = require("./controllers/error");
 const authRoutes = require("./routes/auth");
 const blogRoutes = require("./routes/blog");
 
-const app = express();
+const service = express();
 
-app.use(express.json());
+module.exports = () => {
+  service.use(express.json());
 
-// Cross-Origin Resource Sharing (CORS)
-app.use(cors);
+  service.use(cors);
 
-app.use("/auth", authRoutes);
+  service.use(successLogger, errorLogger);
 
-app.use("/blog", blogRoutes);
+  service.use("/auth", authRoutes);
 
-app.use(errorControllers.err404, errorControllers.err500);
+  service.use("/blog", blogRoutes);
 
-module.exports = app;
+  service.use(err404, err500);
+
+  return service;
+};

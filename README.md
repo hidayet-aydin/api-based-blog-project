@@ -65,7 +65,49 @@ module.exports = (req, res, next) => {
 };
 ```
 
-## 3. Image Upload Middleware (with Multer)
+## 3. HTTP Logger Middleware (with Morgan)
+
+```bash
+$ touch server/middlewares/http-logger.js
+```
+
+```js
+const morgan = require("morgan");
+
+morgan.token("timer", function (req, res) {
+  return new Date().toISOString().replace(/:/g, "");
+});
+
+morgan.token("headers", function (req, res) {
+  return JSON.stringify(req.headers);
+});
+
+const formatGroup = [
+  ":timer", //":date[clf]",
+  ":method",
+  ":status",
+  ":url",
+  ":response-time(ms)",
+  ":headers",
+];
+
+if (process.env.MODE === "production") {
+  formatGroup.push("HTTP/:http-version", ":remote-addr");
+}
+const responseFormat = formatGroup.join(" | ");
+
+exports.successHandler = morgan(responseFormat, {
+  skip: (req, res) => res.statusCode >= 400,
+  stream: { write: console.log },
+});
+
+exports.errorHandler = morgan(responseFormat, {
+  skip: (req, res) => res.statusCode < 400,
+  stream: { write: console.log },
+});
+```
+
+## 4. Image Upload Middleware (with Multer)
 
 ```
 $ touch server/middlewares/image-storage.js
@@ -104,7 +146,7 @@ module.exports = multer({
 }).single("image");
 ```
 
-## 4. Authentication Check Middleware (with JSON WEB TOKEN)
+## 5. Authentication Check Middleware (with JSON WEB TOKEN)
 
 ```
 $ touch server/middlewares/is-auth.js
@@ -133,7 +175,7 @@ module.exports = (req, res, next) => {
 };
 ```
 
-## 5. About Endpoints
+## 6. About Endpoints
 
 There is two different endpoint groups that are consist of auth and blog. Because Blogs are used by users, user account management must be added. Thanks to authentication, a user only can make adding, modify and deletion process to own posts.
 
@@ -143,24 +185,28 @@ Given below are the contents of the **server/server.js** files.
 const express = require("express");
 
 const cors = require("./middlewares/cors");
-const errorControllers = require("./controllers/error");
+const { successLogger, errorLogger } = require("./middlewares/http-logger");
+const { err404, err500 } = require("./controllers/error");
 const authRoutes = require("./routes/auth");
 const blogRoutes = require("./routes/blog");
 
-const app = express();
+const service = express();
 
-app.use(express.json());
+module.exports = () => {
+  service.use(express.json());
 
-// Cross-Origin Resource Sharing (CORS)
-app.use(cors);
+  service.use(cors);
 
-app.use("/auth", authRoutes);
+  service.use(successLogger, errorLogger);
 
-app.use("/blog", blogRoutes);
+  service.use("/auth", authRoutes);
 
-app.use(errorControllers.err404, errorControllers.err500);
+  service.use("/blog", blogRoutes);
 
-module.exports = app;
+  service.use(err404, err500);
+
+  return service;
+};
 ```
 
 Given below are the contents of the **server/routes/auth.js** files.
@@ -228,7 +274,7 @@ router.delete("/:blogId/", isAuth, blogController.deleteBlog);
 module.exports = router;
 ```
 
-## 6. Adding Endpoint and Internal Server Error Handling
+## 7. Adding Endpoint and Internal Server Error Handling
 
 ```bash
 $ touch server/controllers/error.js
@@ -249,7 +295,7 @@ exports.err500 = (error, req, res, next) => {
 };
 ```
 
-## 7. ".env" File
+## 8. ".env" File
 
 ```
 PORT=3000
