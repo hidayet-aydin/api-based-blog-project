@@ -1,6 +1,19 @@
-# A REST API Based Blog Site Project
+<h1 align="center">A REST API Based Blog</h1>
+<p align="center">This application works as a REST API that Users can manage to list, add, delete, edit their own blogs.</p>
+<p align="center">
+    <a href="https://github.com/hidayet-aydin/api-based-blog-project/blob/main/LICENSE.txt"><img src="https://img.shields.io/github/license/arifszn/article-api"/></a>
+</p>
+<br/>
 
-This application works as a REST API that Users can manage to list, add, delete, edit their own blogs.
+![Node.js](https://img.shields.io/badge/node.js-%232c3e50?style=for-the-badge&logo=nodedotjs)
+![Express](https://img.shields.io/badge/express-%232c3e50?style=for-the-badge&logo=express)
+![Nodemon](https://img.shields.io/badge/nodemon-%232c3e50?style=for-the-badge&logo=nodemon)
+![Mocha](https://img.shields.io/badge/mocha-%232c3e50?style=for-the-badge&logo=mocha)
+![Chai](https://img.shields.io/badge/chai-%232c3e50?style=for-the-badge&logo=chai)
+![JS](https://img.shields.io/badge/javascript-%232c3e50?style=for-the-badge&logo=javascript)
+![MongoDB](https://img.shields.io/badge/mongodb-%232c3e50?style=for-the-badge&logo=mongodb)
+![JWT](https://img.shields.io/badge/JWT-%232c3e50?style=for-the-badge&logo=jsonwebtokens)
+![GIT](https://img.shields.io/badge/git-%232c3e50?style=for-the-badge&logo=git)
 
 **Development Modules**
 
@@ -348,3 +361,9 @@ PORT=3000
 MONGODB_URI='mongodb://test-user:newpassword@localhost:27017/api-based-blog'
 JWT_SECRET='somesupersecretsecret'
 ```
+
+## License
+
+MIT Licensed.
+
+Copyright © Hidayet AYDIN 2021.
