@@ -2,7 +2,11 @@
   "name": "api-based-blog-project",
   "version": "1.0.0",
   "description": "This project is backend REST API of a multi-user supported blog site.",
+  "private": true,
   "main": "index.js",
+  "engines": {
+    "node": ">=14.16.1"
+  },
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js --ignore ./logs/",
@@ -31,7 +35,7 @@
     "type": "git",
     "url": "https://github.com/hidayet-aydin/api-based-blog-project.git"
   },
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
