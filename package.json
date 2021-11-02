@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
+    "dev": "nodemon index.js --ignore ./logs/",
     "test": "./node_modules/mocha/bin/mocha \"./{,!(node_modules)/**/}*.test.js\" --exit",
     "coverage": "nyc --reporter=text npm test"
   },
@@ -14,14 +14,18 @@
     "email": "aydin.hid@gmail.com"
   },
   "keywords": [
+    "blog",
+    "multi-user",
     "rest",
     "api",
-    "blog",
     "node.js",
-    "multer",
-    "jwt",
+    "express",
     "mongoose",
-    "multi-user"
+    "bcryptjs",
+    "jwt",
+    "multer",
+    "morgan",
+    "winston"
   ],
   "repository": {
     "type": "git",
@@ -48,6 +52,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.0.12",
     "morgan": "^1.10.0",
-    "multer": "^1.4.3"
+    "multer": "^1.4.3",
+    "winston": "^3.3.3"
   }
 }

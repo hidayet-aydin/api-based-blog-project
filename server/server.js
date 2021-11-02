@@ -1,7 +1,8 @@
 const express = require("express");
 
 const cors = require("./middlewares/cors");
-const { successLogger, errorLogger } = require("./middlewares/http-logger");
+const { httpLogger } = require("./utils/logger");
+const { successHttp, errorHttp } = require("./middlewares/http-logger");
 const { err404, err500 } = require("./controllers/error");
 const authRoutes = require("./routes/auth");
 const blogRoutes = require("./routes/blog");
@@ -13,7 +14,7 @@ module.exports = () => {
 
   service.use(cors);
 
-  service.use(successLogger, errorLogger);
+  service.use(successHttp(httpLogger), errorHttp(httpLogger));
 
   service.use("/auth", authRoutes);
 

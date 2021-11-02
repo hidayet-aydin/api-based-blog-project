@@ -1,33 +1,34 @@
 const morgan = require("morgan");
 
 morgan.token("timer", function (req, res) {
-  return new Date().toISOString().replace(/:/g, "");
+  return new Date().toISOString();
 });
 
+// res.req.headers
+// res.req.body
 morgan.token("headers", function (req, res) {
   return JSON.stringify(req.headers);
 });
 
-const formatGroup = [
+const responseFormat = [
   ":timer", //":date[clf]",
+  ":remote-addr",
+  "HTTP/:http-version",
   ":method",
   ":status",
   ":url",
   ":response-time(ms)",
-  ":headers",
-];
+  "| :headers",
+].join(" | ");
 
-if (process.env.MODE === "production") {
-  formatGroup.push("HTTP/:http-version", ":remote-addr");
-}
-const responseFormat = formatGroup.join(" | ");
+exports.successHttp = (logger) =>
+  morgan(responseFormat, {
+    skip: (req, res) => res.statusCode >= 400,
+    stream: { write: (message) => logger.log("info", message) },
+  });
 
-exports.successLogger = morgan(responseFormat, {
-  skip: (req, res) => res.statusCode >= 400,
-  stream: { write: console.log },
-});
-
-exports.errorLogger = morgan(responseFormat, {
-  skip: (req, res) => res.statusCode < 400,
-  stream: { write: console.log },
-});
+exports.errorHttp = (logger) =>
+  morgan(responseFormat, {
+    skip: (req, res) => res.statusCode < 400,
+    stream: { write: (message) => logger.log("error", message) },
+  });

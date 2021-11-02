@@ -11,7 +11,7 @@ $ npm i --save-dev nodemon nyc supertest mocha chai sinon sinon-chai chai-as-pro
 **Production Modules**
 
 ```bash
-$ npm i --save express mongoose bcryptjs jsonwebtoken dotenv express-validator multer aws-s3
+$ npm i --save express mongoose bcryptjs jsonwebtoken dotenv express-validator winston morgan multer aws-s3
 ```
 
 **Initial Files**
@@ -47,7 +47,52 @@ For a example, MongoDB connection string below is as follows. And, this connecti
 MONGODB_URI='mongodb://test-user:newpassword@localhost:27017/api-based-blog'
 ```
 
-## 2. Cross-Origin Resource Sharing (CORS) Error handling Adding
+## 2. Logger (with Winston)
+
+```bash
+$ touch server/utils/logger.js
+```
+
+```js
+const { config, createLogger, format, transports } = require("winston");
+const { combine, printf, timestamp, prettyPrint } = format;
+
+exports.httpLogger = createLogger({
+  level: "info",
+  format: combine(
+    printf(({ level, message }) => {
+      let msg_parts = message.split(" | | ");
+      return `{"${level}": {"combined": "${msg_parts[0]}", "headers": ${msg_parts[1]}}},`;
+    })
+  ),
+  transports: [
+    new transports.Console(),
+    new transports.File({ filename: "./logs/http.json" }),
+  ],
+});
+```
+
+**Output (./logs/http.json):**
+
+```json
+{
+  "info": {
+    "combined": "2021-11-02T002849.370Z | ::1 | HTTP/1.1 | POST | 201 | /auth/login | 368.041(ms)",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.28.4",
+      "accept": "*/*",
+      "postman-token": "6021275c-b747-448d-962a-af17724bdcc3",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "59"
+    }
+  }
+}
+```
+
+## 3. Cross-Origin Resource Sharing (CORS) Error handling Adding
 
 ```bash
 $ touch server/middlewares/cors.js
@@ -65,7 +110,7 @@ module.exports = (req, res, next) => {
 };
 ```
 
-## 3. HTTP Logger Middleware (with Morgan)
+## 4. HTTP Logger Middleware (with Morgan)
 
 ```bash
 $ touch server/middlewares/http-logger.js
@@ -75,39 +120,38 @@ $ touch server/middlewares/http-logger.js
 const morgan = require("morgan");
 
 morgan.token("timer", function (req, res) {
-  return new Date().toISOString().replace(/:/g, "");
+  return new Date().toISOString();
 });
 
 morgan.token("headers", function (req, res) {
   return JSON.stringify(req.headers);
 });
 
-const formatGroup = [
+const responseFormat = [
   ":timer", //":date[clf]",
+  ":remote-addr",
+  "HTTP/:http-version",
   ":method",
   ":status",
   ":url",
   ":response-time(ms)",
-  ":headers",
-];
+  "| :headers",
+].join(" | ");
 
-if (process.env.MODE === "production") {
-  formatGroup.push("HTTP/:http-version", ":remote-addr");
-}
-const responseFormat = formatGroup.join(" | ");
+exports.successHttp = (logger) =>
+  morgan(responseFormat, {
+    skip: (req, res) => res.statusCode >= 400,
+    stream: { write: (message) => logger.log("info", message) },
+  });
 
-exports.successHandler = morgan(responseFormat, {
-  skip: (req, res) => res.statusCode >= 400,
-  stream: { write: console.log },
-});
-
-exports.errorHandler = morgan(responseFormat, {
-  skip: (req, res) => res.statusCode < 400,
-  stream: { write: console.log },
-});
+exports.errorHttp = (logger) =>
+  morgan(responseFormat, {
+    skip: (req, res) => res.statusCode < 400,
+    stream: { write: (message) => logger.log("error", message) },
+  });
 ```
 
-## 4. Image Upload Middleware (with Multer)
+## 5. Image Upload Middleware (with Multer)
 
 ```
 $ touch server/middlewares/image-storage.js
@@ -146,7 +190,7 @@ module.exports = multer({
 }).single("image");
 ```
 
-## 5. Authentication Check Middleware (with JSON WEB TOKEN)
+## 6. Authentication Check Middleware (with JSON WEB TOKEN)
 
 ```
 $ touch server/middlewares/is-auth.js
@@ -175,7 +219,7 @@ module.exports = (req, res, next) => {
 };
 ```
 
-## 6. About Endpoints
+## 7. About Endpoints
 
 There is two different endpoint groups that are consist of auth and blog. Because Blogs are used by users, user account management must be added. Thanks to authentication, a user only can make adding, modify and deletion process to own posts.
 
@@ -185,7 +229,8 @@ Given below are the contents of the **server/server.js** files.
 const express = require("express");
 
 const cors = require("./middlewares/cors");
-const { successLogger, errorLogger } = require("./middlewares/http-logger");
+const { httpLogger } = require("./utils/logger");
+const { successHttp, errorHttp } = require("./middlewares/http-logger");
 const { err404, err500 } = require("./controllers/error");
 const authRoutes = require("./routes/auth");
 const blogRoutes = require("./routes/blog");
@@ -197,7 +242,7 @@ module.exports = () => {
 
   service.use(cors);
 
-  service.use(successLogger, errorLogger);
+  service.use(successHttp(httpLogger), errorHttp(httpLogger));
 
   service.use("/auth", authRoutes);
 
@@ -274,7 +319,7 @@ router.delete("/:blogId/", isAuth, blogController.deleteBlog);
 module.exports = router;
 ```
 
-## 7. Adding Endpoint and Internal Server Error Handling
+## 8. Adding Endpoint and Internal Server Error Handling
 
 ```bash
 $ touch server/controllers/error.js
@@ -295,10 +340,11 @@ exports.err500 = (error, req, res, next) => {
 };
 ```
 
-## 8. ".env" File
+## 9. ".env" File
 
 ```
+MODE='development'
 PORT=3000
 MONGODB_URI='mongodb://test-user:newpassword@localhost:27017/api-based-blog'
-JWT_SECRET='JWT_SECRET_KEY'
+JWT_SECRET='somesupersecretsecret'
 ```
