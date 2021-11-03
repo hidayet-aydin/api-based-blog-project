@@ -362,6 +362,20 @@ MONGODB_URI='mongodb://test-user:newpassword@localhost:27017/api-based-blog'
 JWT_SECRET='somesupersecretsecret'
 ```
 
+## 10. Test Report
+
+-----------------|---------|----------|---------|---------|-------------------
+File             | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-----------------|---------|----------|---------|---------|-------------------
+All files        |     100 |     92.5 |     100 |     100 |                   
+ controllers     |     100 |     92.1 |     100 |     100 |                   
+  auth.js        |     100 |     92.1 |     100 |     100 | 38,106-109        
+ middlewares     |     100 |      100 |     100 |     100 |                   
+  is-auth.js     |     100 |      100 |     100 |     100 |                   
+ models/mongoose |     100 |      100 |     100 |     100 |                   
+  user.js        |     100 |      100 |     100 |     100 |                   
+-----------------|---------|----------|---------|---------|-------------------
+
 ## License
 
 MIT Licensed.

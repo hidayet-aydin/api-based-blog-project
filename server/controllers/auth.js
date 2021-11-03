@@ -204,7 +204,7 @@ exports.postUpload = async (req, res, next) => {
       };
       const S3Client = new s3(config);
       const S3ResData = await S3Client.uploadFile(data_pack);
-      console.log(S3ResData);
+      // console.log(S3ResData);
       // {
       //   Response: {
       //     bucket: "your-bucket-name",
